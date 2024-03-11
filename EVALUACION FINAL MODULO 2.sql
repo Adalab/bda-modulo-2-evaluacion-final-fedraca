@@ -74,7 +74,7 @@ GROUP BY rating;
 
 SELECT CONCAT(first_name, "  ", last_name) AS nombre_completo, c.customer_id, COUNT(*) AS total_alquiladas
 FROM customer AS c
-JOIN rental AS r ON c.customer_id = r.customer_id
+LEFT JOIN rental AS r ON c.customer_id = r.customer_id
 GROUP BY customer_id, nombre_completo;
 
 
@@ -89,9 +89,9 @@ FROM category;
 
 SELECT ca.name AS nombre_category, COUNT(*) AS total_peliculas
 FROM category AS ca
-JOIN film AS f ON 
-JOIN inventory AS i ON f.film_id = i.film_id
-JOIN rental AS r ON i.inventory_id = r.inventory_id
+INNER JOIN film AS f ON 
+INNER JOIN inventory AS i ON f.film_id = i.film_id
+INNER JOIN rental AS r ON i.inventory_id = r.inventory_id
 GROUP BY ca.name;
 
 
@@ -115,9 +115,9 @@ WHERE title= "Indian Love";
 
 SELECT a.first_name, a.last_name
 FROM actor AS a
-JOIN film_actor AS fa 
+INNER JOIN film_actor AS fa 
 ON a.actor_id = fa.actor_id
-JOIN  film AS f      /*BUSCAMOS EN LA TABLA FILM EL TITULO DE INDIAN LOVE */
+INNER JOIN  film AS f      /*BUSCAMOS EN LA TABLA FILM EL TITULO DE INDIAN LOVE */
 ON fa.film_id = f.film_id
 WHERE  f.title = 'Indian Love';   
 
@@ -135,7 +135,7 @@ FROM film_actor;
 
 SELECT a.actor_id, a.first_name, a.last_name
 FROM actor AS a
-LEFT JOIN film_actor AS fa ON a.actor_id = fa.actor_id
+INNER JOIN film_actor AS fa ON a.actor_id = fa.actor_id
 WHERE fa.actor_id IS NULL;  
  
  /*BUSCAMOS POR ACTOR_ID EN LA TABLA FILM_ACTOR Y ESTA HACE UNION CON LA TABLA DE ACTORES, 
@@ -161,9 +161,9 @@ WHERE name = "Family";
 
 SELECT f.title
 FROM film AS f
-JOIN film_category AS fc 
+INNER JOIN film_category AS fc 
 ON f.film_id = fc.film_id
-JOIN category AS c 
+LEFT JOIN category AS c 
 ON fc.category_id = c.category_id
 WHERE c.name = 'Family';
 
@@ -199,7 +199,7 @@ SELECT c.name AS nombre_categoria, AVG(f.length) AS promedio_duracion
 FROM category AS c
 JOIN  film_category AS fc 
 ON c.category_id = fc.category_id
-JOIN film AS f 
+INNER JOIN film AS f 
 ON fc.film_id = f.film_id
 GROUP BY c.name
 HAVING promedio_duracion > 120;
@@ -225,7 +225,7 @@ SELECT title
 FROM film
 WHERE film_id IN(SELECT inventory.film_id                         /*la subconsulta nos muestra el id_inventario para peliculas que se alquilan pormas de 5 dias */
                   FROM rental
-                  JOIN inventory ON rental.inventory_id = inventory.inventory_id
+                  LEFT JOIN inventory ON rental.inventory_id = inventory.inventory_id
                   WHERE DATEDIFF(return_date, rental_date)> 5);      /* DATEDIFF SE UTILIZA PARA CALCULAR LA DIFERENCIA ENTRE DOS FECHAS*/
 			
 
@@ -233,8 +233,7 @@ WHERE film_id IN(SELECT inventory.film_id                         /*la subconsul
 Utiliza una subconsulta para encontrar los actores que han actuado en películas de la categoría "Horror" y luego exclúyelos de la lista de actores.*/
 
 
-SELECT first_name, 
-	   last_name          
+SELECT first_name, last_name          
 	FROM actor        /*los actores que no han actuado en pelicula de horror*/        
 	WHERE actor_id NOT IN (SELECT actor_id       /* para sacar los actores que han actuado en pelis de horror*/ /*LO BUSCAMOS POR ACTOR_ID, Y QUE ESTE A SU VEZ TENGA SU FILM_ID EN LA CATEGORIA HORROR*/
 							FROM film_actor   
